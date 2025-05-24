@@ -7,3 +7,5 @@
 * To run the java program use the following script: 
     source java/scripts/compile.sh  
 
+Testing git on readme file
+
