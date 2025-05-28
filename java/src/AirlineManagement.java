@@ -380,10 +380,10 @@ public class AirlineManagement {
    public static void feature1(AirlineManagement esql) {
       System.out.println("View flights");
       try{
-         String query = "SELECT * FROM Schedule Where FlightNumber = ";
+         String query = "SELECT * FROM Schedule WHERE FlightNumber = '";
          System.out.print("\tEnter flight number: ");
          String input = in.readLine();
-         query += input;
+         query = query + input + "'";
 
          int rowCount = esql.executeQueryAndPrintResult(query);
          System.out.println ("total row(s): " + rowCount);
@@ -398,7 +398,7 @@ public class AirlineManagement {
          System.out.print("\tEnter flight: ");
          String inputFlight = in.readLine();
          query += inputFlight;
-         System.out.print("\tEnter date (YYYY-DD-MM): ");
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
          String inputDate = in.readLine();
          query = query + "AND FlightDate = DATE '" + inputDate + "'";
 
@@ -411,7 +411,12 @@ public class AirlineManagement {
    public static void feature3(AirlineManagement esql) {
       System.out.println("View flight status");
       try {
-         String query = "Select * From FlightInstance Where FlightInstanceID = 1";
+         String query = "Select CASE WHEN DepartedOnTime = 't' THEN 'true' ELSE 'false' END AS DepartedOnTime, CASE WHEN ArrivedOnTime = 't' THEN 'true' ELSE 'false' END AS ArrivedOnTime From FlightInstance Where FlightInstanceID = ";
+         System.out.print("\tEnter FlightInstanceID: ");
+         String input = in.readLine();
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + input + "AND FlightDate = Date '" + inputDate + "'";
          int rowCount = esql.executeQueryAndPrintResult(query);
          System.out.println ("total row(s): " + rowCount);
       }catch(Exception e){
@@ -420,6 +425,17 @@ public class AirlineManagement {
    }
    public static void feature4(AirlineManagement esql) {
       System.out.println("View flights of the day");
+      try{
+         String query = "SELECT * FROM FlightInstance WHERE FlightDate = ";
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + "DATE '" + inputDate + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
    }
    public static void feature5(AirlineManagement esql) {
       System.out.println("View full order id history");
