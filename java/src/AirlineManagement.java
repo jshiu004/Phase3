@@ -439,6 +439,19 @@ public class AirlineManagement {
    }
    public static void feature5(AirlineManagement esql) {
       System.out.println("View full order id history");
+      try{
+         String query = "SELECT c.FirstName, c.LastName, r.Status FROM Customer c join Reservation r On c.CustomerID = r.customerID join FlightInstance f On f.FlightInstanceID = r.FlightInstanceID WHERE f.FlightInstanceID = ";
+         System.out.print("\tEnter FlightInstanceID: ");
+         String input = in.readLine();
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + input + "AND f.FlightDate = DATE '" + inputDate + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
    }
    public static void feature6(AirlineManagement esql) {
       System.out.println("View flights");
