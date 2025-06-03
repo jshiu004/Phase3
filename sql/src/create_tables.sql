@@ -109,9 +109,9 @@ CREATE TABLE MaintenanceRequest (
     FOREIGN KEY (PilotID) REFERENCES Pilot(PilotID)
 );
 
-CREATE TABLE Users {
+CREATE TABLE Users (
     username TEXT PRIMARY KEY,
     password TEXT,
     role TEXT,
     CHECK(role IN ('management', 'customer', 'pilot', 'technician'))
-};
+);
