@@ -269,30 +269,38 @@ public class AirlineManagement {
                 System.out.println("MAIN MENU");
                 System.out.println("---------");
 
-                //**the following functionalities should only be able to be used by Management**
-                System.out.println("1. View Flights");
-                System.out.println("2. View Flight Seats");
-                System.out.println("3. View Flight Status");
-                System.out.println("4. View Flights of the day");  
-                System.out.println("5. View Full Order ID History");
-                System.out.println(".........................");
-                System.out.println(".........................");
+                switch(authorisedUser) {
+                  case "management":
+                     //**the following functionalities should only be able to be used by Management**
+                     System.out.println("1. View Flights");
+                     System.out.println("2. View Flight Seats");
+                     System.out.println("3. View Flight Status");
+                     System.out.println("4. View Flights of the day");  
+                     System.out.println("5. View Full Order ID History");
+                     System.out.println("20. Log out");
+                     break;
+                  case "customer":
+                     //**the following functionalities should only be able to be used by customers**
+                     System.out.println("10. Search Flights");
+                     System.out.println(".........................");
+                     System.out.println(".........................");
+                     System.out.println("20. Log out");
+                     break;
+                  case "pilot":
+                     //**the following functionalities should ony be able to be used by Pilots**
+                     System.out.println("15. Maintenace Request");
+                     System.out.println(".........................");
+                     System.out.println(".........................");
+                     System.out.println("20. Log out");
+                     break;
+                  case "maintenance":
+                     //**the following functionalities should ony be able to be used by Technicians**
+                     System.out.println(".........................");
+                     System.out.println(".........................");
+                     System.out.println("20. Log out");
+                     break;
+                }
 
-                //**the following functionalities should only be able to be used by customers**
-                System.out.println("10. Search Flights");
-                System.out.println(".........................");
-                System.out.println(".........................");
-
-                //**the following functionalities should ony be able to be used by Pilots**
-                System.out.println("15. Maintenace Request");
-                System.out.println(".........................");
-                System.out.println(".........................");
-
-               //**the following functionalities should ony be able to be used by Technicians**
-                System.out.println(".........................");
-                System.out.println(".........................");
-
-                System.out.println("20. Log out");
                 switch (readChoice()){
                    case 1: feature1(esql); break;
                    case 2: feature2(esql); break;
@@ -408,6 +416,28 @@ public class AirlineManagement {
     * @return User login or null is the user does not exist
     **/
    public static String LogIn(AirlineManagement esql){
+      try {
+         System.out.println("Hello!");
+         String username, password;
+         System.out.print("Input username: ");
+         username = in.readLine();
+         System.out.print("Input password: ");
+         password = in.readLine();
+         String query = "SELECT Users.role From Users Where username = '";
+         query = query + username + "' AND password = '" + password + "'";
+         int count = esql.executeQuery(query);
+         if(count > 0) {
+            List<List<String>> rolesList = new ArrayList<>();
+            rolesList = esql.executeQueryAndReturnResult(query);
+            return rolesList.get(0).get(0);
+         }
+         else {
+            System.out.println("Username or password is incorrect, please try again");
+            return null;
+         }
+      }catch(Exception e) {
+         System.err.println(e.getMessage());
+      }
       return null;
    }//end
 
