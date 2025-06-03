@@ -363,6 +363,42 @@ public class AirlineManagement {
       System.out.println("2. Customer");
       System.out.println("3. Maintenance Staff");
       System.out.println("4. Pilot");
+      System.out.println("Please enter a number from 1-4");
+
+      int choice = readChoice();
+      while(choice != 1 && choice != 2 && choice != 3 && choice != 4) {
+         System.out.println("Your choice was invalid. Please enter a number from 1-4");
+         choice = readChoice();
+      }
+
+      String role = null;
+      switch(choice) {
+         case 1:
+            role = "management";
+            break;
+         case 2:
+            role = "customer";
+            break;
+         case 3:
+            role = "maintenance";
+            break;
+         case 4:
+            role = "pilot";
+            break;
+      }
+      try {
+         String username, password;
+         System.out.print("Please enter a username: ");
+         username = in.readLine();
+         System.out.print("Please enter a password: ");
+         password = in.readLine();
+         String query = "INSERT INTO Users(username, password, role) VALUES('";
+         query = query + username + "','" + password + "','" + role + "')";
+         esql.executeUpdate(query);
+      }
+      catch (IOException | SQLException e) {
+        System.err.println("Error creating user: " + e.getMessage());
+    }
 
    }//end CreateUser
 
