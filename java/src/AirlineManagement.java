@@ -10,7 +10,7 @@
  *
  */
 
-
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -408,7 +408,7 @@ public class AirlineManagement {
     * @return User login or null is the user does not exist
     **/
    public static String LogIn(AirlineManagement esql){
-      return "yes";
+      return null;
    }//end
 
 // Rest of the functions definition go in here
