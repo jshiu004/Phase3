@@ -293,7 +293,7 @@ public class AirlineManagement {
                      System.out.println(".........................");
                      System.out.println("20. Log out");
                      break;
-                  case "maintenance":
+                  case "technician":
                      //**the following functionalities should ony be able to be used by Technicians**
                      System.out.println(".........................");
                      System.out.println(".........................");
@@ -388,16 +388,31 @@ public class AirlineManagement {
             role = "customer";
             break;
          case 3:
-            role = "maintenance";
+            role = "technician";
             break;
          case 4:
             role = "pilot";
             break;
       }
       try {
-         String username, password;
-         System.out.print("Please enter a username: ");
-         username = in.readLine();
+         String username = null;
+         String password = null;
+         boolean unique = false;
+         int attempts = 0;
+         while(!unique || attempts == 0) {
+            System.out.print("Please enter a username: ");
+            username = in.readLine();
+            String query = "SELECT username FROM Users WHERE username = '";
+            query = query + username + "'";
+            int count = esql.executeQuery(query);
+            if(count > 0) {
+               System.out.println("Username already taken. Please input another one.");
+            }
+            else {
+               unique = true;
+            }
+            attempts++;
+         }
          System.out.print("Please enter a password: ");
          password = in.readLine();
          String query = "INSERT INTO Users(username, password, role) VALUES('";
