@@ -277,13 +277,19 @@ public class AirlineManagement {
                      System.out.println("3. View Flight Status");
                      System.out.println("4. View Flights of the day");  
                      System.out.println("5. View Full Order ID History");
+                     System.out.println("6. Find all information on traveler on a reservation");
+                     System.out.println("7. Get Plane information");
+                     System.out.println("8. Get all repairs made by a technician");
+                     System.out.println("9. Get all repairs made on a plane");
+                     System.out.println("10. View flight statistics");
                      System.out.println("20. Log out");
                      break;
                   case "customer":
                      //**the following functionalities should only be able to be used by customers**
-                     System.out.println("10. Search Flights");
-                     System.out.println(".........................");
-                     System.out.println(".........................");
+                     System.out.println("11. Search Flights");
+                     System.out.println("12. Search Flight cost");
+                     System.out.println("13. Search flight airplane type");
+                     System.out.println("14. Make a reservation");
                      System.out.println("20. Log out");
                      break;
                   case "pilot":
@@ -308,6 +314,15 @@ public class AirlineManagement {
                    case 4: feature4(esql); break;
                    case 5: feature5(esql); break;
                    case 6: feature6(esql); break;
+                   case 7: feature7(esql); break;
+                   case 8: feature8(esql); break;
+                   case 9: feature9(esql); break;
+                   case 10: feature10(esql); break;
+                   case 11: feature11(esql); break;
+                   case 12: feature12(esql); break;
+                   case 13: feature13(esql); break;
+                   case 14: feature14(esql); break;
+                   
 
 
 
@@ -535,7 +550,117 @@ public class AirlineManagement {
       }
    }
    public static void feature6(AirlineManagement esql) {
-      System.out.println("View flights");
+   }
+   public static void feature7(AirlineManagement esql) {
+      try {
+         String query = "SELECT Make, Model FROM Plane WHERE PlaneID = '";
+         System.out.print("\t Enter PlaneID: ");
+         String input = in.readLine();
+         query = query + input + "'";
+         int count = esql.executeQuery(query);
+         if(count == 0) {
+            System.out.println("No such plane, try again");
+         }
+         else {
+            esql.executeQueryAndPrintResult(query);
+         } 
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature8(AirlineManagement esql) {
+      try {
+         String query = "SELECT * FROM Repair r JOIN Technician t ON r.TechnicianID = t.TechnicianID WHERE t.TechnicianID = '";
+         System.out.print("\t Enter TechnicianID: ");
+         String input = in.readLine();
+         query = query + input + "'";
+         int count = esql.executeQuery(query);
+         if(count == 0) {
+            System.out.println("No such Technician, try again");
+         }
+         else {
+            esql.executeQueryAndPrintResult(query);
+         } 
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature9(AirlineManagement esql) {
+      try {
+         String query = "SELECT RepairDate, RepairCode FROM Repair WHERE PlaneID = '";
+         System.out.print("\t Enter PlaneID: ");
+         String plane = in.readLine();
+         System.out.print("\t Enter start date for range (YYYY-MM-DD): ");
+         String startDate = in.readLine();
+         System.out.print("\t Enter end date for range (YYYY-MM-DD): ");
+         String endDate = in.readLine();
+         query = query + plane + "' AND RepairDate >= '" + startDate + "' AND RepairDate <= '" + endDate + "'";
+         int count = esql.executeQuery(query);
+         if(count == 0) {
+            System.out.println("No such Technician, try again");
+         }
+         else {
+            esql.executeQueryAndPrintResult(query);
+         } 
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature10(AirlineManagement esql) {
+      try{
+         String query1 = "SELECT COUNT(*) as TotalOnTimeDepartures FROM FlightInstance Where FlightNumber = '";
+         String query2 = "SELECT COUNT(*) as TotalOnTimeArrivals FROM FlightInstance Where FlightNumber = '";
+         String query3 = "SELECT SUM(SeatsSold) as Total_Seats_Sold FROM FlightInstance Where FlightNumber = '";
+
+         System.out.print("\tEnter flight: ");
+         String inputFlight = in.readLine();
+         System.out.print("\tEnter start date range (YYYY-MM-DD): ");
+         String startDate = in.readLine();
+         System.out.print("\tEnter end date range (YYYY-MM-DD): ");
+         String endDate = in.readLine();
+
+         query1 = query1 + inputFlight + "'  AND FlightDate >= '" + startDate + "'  AND FlightDate <= '" + endDate + "'  AND DepartedOnTime = TRUE";
+         query2 = query2 + inputFlight + "'  AND FlightDate >= '" + startDate + "'  AND FlightDate <= '" + endDate + "'  AND ArrivedOnTime = TRUE";
+         query3 = query3 + inputFlight + "'  AND FlightDate >= '" + startDate + "'  AND FlightDate <= '" + endDate + "'";
+         esql.executeQueryAndPrintResult(query1);
+         esql.executeQueryAndPrintResult(query2);
+         esql.executeQueryAndPrintResult(query3);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature11(AirlineManagement esql) {
+      try {
+         System.out.print("\tEnter a destination city: ");
+         String destinationCity = in.readLine();
+         System.out.print("\tEnter a departure city: ");
+         String departureCity = in.readLine();
+         String query = "SELECT s.FlightNumber, s.DayOfWeek, s.DepartureTime, s.ArrivalTime FROM Schedule s join Flight f on s.FlightNumber = f.FlightNumber WHERE f.DepartureCity = '" + departureCity + "'  AND f.ArrivalCity = '" + destinationCity + "'";
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature12(AirlineManagement esql) {
+      try {
+         System.out.print("\tEnter a flight number: ");
+         String flightNumber = in.readLine();
+         String query = "SELECT FlightNumber, TicketCost FROM FlightInstance WHERE FlightNumber = '" + flightNumber + "'";
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature13(AirlineManagement esql) {
+      try {
+         System.out.print("\tEnter a flight number: ");
+         String flightNumber = in.readLine();
+         String query = "SELECT p.Make, p.Model FROM Flight f join Plane p on f.PlaneID = p.PlaneID WHERE f.FlightNumber = '" + flightNumber + "'";
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature14(AirlineManagement esql) {
    }
   
 
