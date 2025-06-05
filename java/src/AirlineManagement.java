@@ -10,7 +10,7 @@
  *
  */
 
-
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -269,30 +269,38 @@ public class AirlineManagement {
                 System.out.println("MAIN MENU");
                 System.out.println("---------");
 
-                //**the following functionalities should only be able to be used by Management**
-                System.out.println("1. View Flights");
-                System.out.println("2. View Flight Seats");
-                System.out.println("3. View Flight Status");
-                System.out.println("4. View Flights of the day");  
-                System.out.println("5. View Full Order ID History");
-                System.out.println(".........................");
-                System.out.println(".........................");
+                switch(authorisedUser) {
+                  case "management":
+                     //**the following functionalities should only be able to be used by Management**
+                     System.out.println("1. View Flights");
+                     System.out.println("2. View Flight Seats");
+                     System.out.println("3. View Flight Status");
+                     System.out.println("4. View Flights of the day");  
+                     System.out.println("5. View Full Order ID History");
+                     System.out.println("20. Log out");
+                     break;
+                  case "customer":
+                     //**the following functionalities should only be able to be used by customers**
+                     System.out.println("10. Search Flights");
+                     System.out.println(".........................");
+                     System.out.println(".........................");
+                     System.out.println("20. Log out");
+                     break;
+                  case "pilot":
+                     //**the following functionalities should ony be able to be used by Pilots**
+                     System.out.println("15. Maintenace Request");
+                     System.out.println(".........................");
+                     System.out.println(".........................");
+                     System.out.println("20. Log out");
+                     break;
+                  case "technician":
+                     //**the following functionalities should ony be able to be used by Technicians**
+                     System.out.println(".........................");
+                     System.out.println(".........................");
+                     System.out.println("20. Log out");
+                     break;
+                }
 
-                //**the following functionalities should only be able to be used by customers**
-                System.out.println("10. Search Flights");
-                System.out.println(".........................");
-                System.out.println(".........................");
-
-                //**the following functionalities should ony be able to be used by Pilots**
-                System.out.println("15. Maintenace Request");
-                System.out.println(".........................");
-                System.out.println(".........................");
-
-               //**the following functionalities should ony be able to be used by Technicians**
-                System.out.println(".........................");
-                System.out.println(".........................");
-
-                System.out.println("20. Log out");
                 switch (readChoice()){
                    case 1: feature1(esql); break;
                    case 2: feature2(esql); break;
@@ -357,6 +365,64 @@ public class AirlineManagement {
     * Creates a new user
     **/
    public static void CreateUser(AirlineManagement esql){
+      System.out.println("Hello new user");
+      System.out.println("Please indicate your position");
+      System.out.println("1. Airline Management");
+      System.out.println("2. Customer");
+      System.out.println("3. Maintenance Staff");
+      System.out.println("4. Pilot");
+      System.out.println("Please enter a number from 1-4");
+
+      int choice = readChoice();
+      while(choice != 1 && choice != 2 && choice != 3 && choice != 4) {
+         System.out.println("Your choice was invalid. Please enter a number from 1-4");
+         choice = readChoice();
+      }
+
+      String role = null;
+      switch(choice) {
+         case 1:
+            role = "management";
+            break;
+         case 2:
+            role = "customer";
+            break;
+         case 3:
+            role = "technician";
+            break;
+         case 4:
+            role = "pilot";
+            break;
+      }
+      try {
+         String username = null;
+         String password = null;
+         boolean unique = false;
+         int attempts = 0;
+         while(!unique || attempts == 0) {
+            System.out.print("Please enter a username: ");
+            username = in.readLine();
+            String query = "SELECT username FROM Users WHERE username = '";
+            query = query + username + "'";
+            int count = esql.executeQuery(query);
+            if(count > 0) {
+               System.out.println("Username already taken. Please input another one.");
+            }
+            else {
+               unique = true;
+            }
+            attempts++;
+         }
+         System.out.print("Please enter a password: ");
+         password = in.readLine();
+         String query = "INSERT INTO Users(username, password, role) VALUES('";
+         query = query + username + "','" + password + "','" + role + "')";
+         esql.executeUpdate(query);
+      }
+      catch (IOException | SQLException e) {
+        System.err.println("Error creating user: " + e.getMessage());
+    }
+
    }//end CreateUser
 
 
@@ -365,17 +431,112 @@ public class AirlineManagement {
     * @return User login or null is the user does not exist
     **/
    public static String LogIn(AirlineManagement esql){
+      try {
+         System.out.println("Hello!");
+         String username, password;
+         System.out.print("Input username: ");
+         username = in.readLine();
+         System.out.print("Input password: ");
+         password = in.readLine();
+         String query = "SELECT Users.role From Users Where username = '";
+         query = query + username + "' AND password = '" + password + "'";
+         int count = esql.executeQuery(query);
+         if(count > 0) {
+            List<List<String>> rolesList = new ArrayList<>();
+            rolesList = esql.executeQueryAndReturnResult(query);
+            return rolesList.get(0).get(0);
+         }
+         else {
+            System.out.println("Username or password is incorrect, please try again");
+            return null;
+         }
+      }catch(Exception e) {
+         System.err.println(e.getMessage());
+      }
       return null;
    }//end
 
 // Rest of the functions definition go in here
 
-   public static void feature1(AirlineManagement esql) {}
-   public static void feature2(AirlineManagement esql) {}
-   public static void feature3(AirlineManagement esql) {}
-   public static void feature4(AirlineManagement esql) {}
-   public static void feature5(AirlineManagement esql) {}
-   public static void feature6(AirlineManagement esql) {}
+   public static void feature1(AirlineManagement esql) {
+      System.out.println("View flights");
+      try{
+         String query = "SELECT * FROM Schedule WHERE FlightNumber = '";
+         System.out.print("\tEnter flight number: ");
+         String input = in.readLine();
+         query = query + input + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature2(AirlineManagement esql) {
+      System.out.println("View flight seats");
+      try{
+         String query = "SELECT SeatsTotal - SeatsSold as SeatsAvailable, SeatsSold FROM FlightInstance Where FlightInstanceID = ";
+         System.out.print("\tEnter flight: ");
+         String inputFlight = in.readLine();
+         query += inputFlight;
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + "AND FlightDate = DATE '" + inputDate + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature3(AirlineManagement esql) {
+      System.out.println("View flight status");
+      try {
+         String query = "Select CASE WHEN DepartedOnTime = 't' THEN 'true' ELSE 'false' END AS DepartedOnTime, CASE WHEN ArrivedOnTime = 't' THEN 'true' ELSE 'false' END AS ArrivedOnTime From FlightInstance Where FlightInstanceID = ";
+         System.out.print("\tEnter FlightInstanceID: ");
+         String input = in.readLine();
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + input + "AND FlightDate = Date '" + inputDate + "'";
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature4(AirlineManagement esql) {
+      System.out.println("View flights of the day");
+      try{
+         String query = "SELECT * FROM FlightInstance WHERE FlightDate = ";
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + "DATE '" + inputDate + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature5(AirlineManagement esql) {
+      System.out.println("View full order id history");
+      try{
+         String query = "SELECT c.FirstName, c.LastName, r.Status FROM Customer c join Reservation r On c.CustomerID = r.customerID join FlightInstance f On f.FlightInstanceID = r.FlightInstanceID WHERE f.FlightInstanceID = ";
+         System.out.print("\tEnter FlightInstanceID: ");
+         String input = in.readLine();
+         System.out.print("\tEnter date (YYYY-MM-DD): ");
+         String inputDate = in.readLine();
+         query = query + input + "AND f.FlightDate = DATE '" + inputDate + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void feature6(AirlineManagement esql) {
+      System.out.println("View flights");
+   }
   
 
 
