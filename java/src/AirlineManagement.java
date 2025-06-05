@@ -283,6 +283,20 @@ public class AirlineManagement {
                      System.out.println("9. Get all repairs made on a plane");
                      System.out.println("10. View flight statistics");
                      System.out.println("20. Log out");
+                     switch(readChoice()) {
+                        case 1: feature1(esql); break;
+                        case 2: feature2(esql); break;
+                        case 3: feature3(esql); break;
+                        case 4: feature4(esql); break;
+                        case 5: feature5(esql); break;
+                        case 6: feature6(esql); break;
+                        case 7: feature7(esql); break;
+                        case 8: feature8(esql); break;
+                        case 9: feature9(esql); break;
+                        case 10: feature10(esql); break;
+                        case 20: usermenu = false; break;
+                        default : System.out.println("Unrecognized choice!"); break;
+                     }
                      break;
                   case "customer":
                      //**the following functionalities should only be able to be used by customers**
@@ -291,6 +305,15 @@ public class AirlineManagement {
                      System.out.println("13. Search flight airplane type");
                      System.out.println("14. Make a reservation");
                      System.out.println("20. Log out");
+                     switch(readChoice()) {
+                        case 11: feature11(esql); break;
+                        case 12: feature12(esql); break;
+                        case 13: feature13(esql); break;
+                        case 14: feature14(esql); break;
+                        case 20: usermenu = false; break;
+
+                        default : System.out.println("Unrecognized choice!"); break;
+                     }
                      break;
                   case "pilot":
                      //**the following functionalities should ony be able to be used by Pilots**
@@ -307,29 +330,29 @@ public class AirlineManagement {
                      break;
                 }
 
-                switch (readChoice()){
-                   case 1: feature1(esql); break;
-                   case 2: feature2(esql); break;
-                   case 3: feature3(esql); break;
-                   case 4: feature4(esql); break;
-                   case 5: feature5(esql); break;
-                   case 6: feature6(esql); break;
-                   case 7: feature7(esql); break;
-                   case 8: feature8(esql); break;
-                   case 9: feature9(esql); break;
-                   case 10: feature10(esql); break;
-                   case 11: feature11(esql); break;
-                   case 12: feature12(esql); break;
-                   case 13: feature13(esql); break;
-                   case 14: feature14(esql); break;
+               //  switch (readChoice()){
+               //     case 1: feature1(esql); break;
+               //     case 2: feature2(esql); break;
+               //     case 3: feature3(esql); break;
+               //     case 4: feature4(esql); break;
+               //     case 5: feature5(esql); break;
+               //     case 6: feature6(esql); break;
+               //     case 7: feature7(esql); break;
+               //     case 8: feature8(esql); break;
+               //     case 9: feature9(esql); break;
+               //     case 10: feature10(esql); break;
+               //     case 11: feature11(esql); break;
+               //     case 12: feature12(esql); break;
+               //     case 13: feature13(esql); break;
+               //     case 14: feature14(esql); break;
                    
 
 
 
 
-                   case 20: usermenu = false; break;
-                   default : System.out.println("Unrecognized choice!"); break;
-                }
+               //     case 20: usermenu = false; break;
+               //     default : System.out.println("Unrecognized choice!"); break;
+               //  }
               }
             }
          }//end while
@@ -636,6 +659,7 @@ public class AirlineManagement {
          System.out.print("\tEnter a departure city: ");
          String departureCity = in.readLine();
          String query = "SELECT s.FlightNumber, s.DayOfWeek, s.DepartureTime, s.ArrivalTime FROM Schedule s join Flight f on s.FlightNumber = f.FlightNumber WHERE f.DepartureCity = '" + departureCity + "'  AND f.ArrivalCity = '" + destinationCity + "'";
+         esql.executeQueryAndPrintResult(query);
       }catch(Exception e){
          System.err.println (e.getMessage());
       }
@@ -644,7 +668,7 @@ public class AirlineManagement {
       try {
          System.out.print("\tEnter a flight number: ");
          String flightNumber = in.readLine();
-         String query = "SELECT FlightNumber, TicketCost FROM FlightInstance WHERE FlightNumber = '" + flightNumber + "'";
+         String query = "SELECT FlightNumber, FlightDate, TicketCost FROM FlightInstance WHERE FlightNumber = '" + flightNumber + "'";
          esql.executeQueryAndPrintResult(query);
       }catch(Exception e){
          System.err.println (e.getMessage());
@@ -661,6 +685,55 @@ public class AirlineManagement {
       }
    }
    public static void feature14(AirlineManagement esql) {
+      try {
+         System.out.println("\tMaking a reservation");
+         // System.out.println("\tEnter first name: ");
+         // String firstName = in.readLine();
+         // System.out.println("\tEnter last name");
+         // String lastName = in.readLine();
+
+         System.out.print("\tEnter customerID: ");
+         String customerID = in.readLine();
+
+         String numReservationsQuery = "SELECT COUNT(*) FROM RESERVATION";
+         int numReservations = 0;
+         List<List<String>> result = esql.executeQueryAndReturnResult(numReservationsQuery);
+         numReservations = Integer.parseInt(result.get(0).get(0));
+         numReservations++;
+         String reservationID = String.format("R%04d", numReservations);
+
+         System.out.print("\tEnter flight instance id: ");
+         String flightInstanceID = in.readLine();
+
+         String seatsSoldQuery = "SELECT SeatsSold FROM FlightInstance WHERE FlightInstanceID = '" + flightInstanceID + "'";
+         int numSeatsSold = 0;
+         List<List<String>> SeatsSold = new ArrayList<>();
+         SeatsSold = esql.executeQueryAndReturnResult(seatsSoldQuery);
+         numSeatsSold = Integer.parseInt(SeatsSold.get(0).get(0));
+
+         String totalSeatsQuery = "SELECT SeatsTotal FROM FlightInstance WHERE FlightInstanceID = '" + flightInstanceID + "'";
+         int numSeatsTotal = 0;
+         List<List<String>> SeatsTotal = new ArrayList<>();
+         SeatsTotal = esql.executeQueryAndReturnResult(totalSeatsQuery);
+         numSeatsTotal = Integer.parseInt(SeatsTotal.get(0).get(0));
+
+         String addReservation = null;
+         if(numSeatsSold < numSeatsTotal) {
+            addReservation = "INSERT INTO Reservation (ReservationID, CustomerID, FlightInstanceID, Status) VALUES ('" + reservationID + "', '" + customerID + "', '" + flightInstanceID + "', 'reserved');";
+            esql.executeUpdate(addReservation);
+            String updateTickets = "UPDATE FlightInstance SET SeatsSold = SeatsSold + 1, WHERE FlightInstanceID = '" + flightInstanceID + "'";
+         }
+         else {
+            addReservation = "INSERT INTO Reservation (ReservationID, CustomerID, FlightInstanceID, Status) VALUES ('" + reservationID + "', '" + customerID + "', '" + flightInstanceID + "', 'waitlist');";
+            esql.executeUpdate(addReservation);
+         }
+
+
+
+
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
    }
   
 
