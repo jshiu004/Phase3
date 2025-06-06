@@ -318,15 +318,28 @@ public class AirlineManagement {
                   case "pilot":
                      //**the following functionalities should ony be able to be used by Pilots**
                      System.out.println("15. Maintenace Request");
-                     System.out.println(".........................");
-                     System.out.println(".........................");
                      System.out.println("20. Log out");
+                     switch(readChoice()) {
+                        case 15: createMaintenanceRequest(esql); break;
+                        case 20: usermenu = false; break;
+
+                        default : System.out.println("Unrecognized choice!"); break;
+                     }
                      break;
                   case "technician":
                      //**the following functionalities should ony be able to be used by Technicians**
-                     System.out.println(".........................");
-                     System.out.println(".........................");
+                     System.out.println("16. View Repairs for a Plane");
+                     System.out.println("17. View Maintenance Request by Pilot");
+                     System.out.println("18. Log Repair Entry");
                      System.out.println("20. Log out");
+                     switch(readChoice()) {
+                        case 16: viewRepairsForPlaneInRange(esql); break;
+                        case 17: viewPilotMaintenanceRequests(esql); break;
+                        case 18: logRepairEntry(esql); break;
+                        case 20: usermenu = false; break;
+
+                        default : System.out.println("Unrecognized choice!"); break;
+                     }
                      break;
                 }
 
@@ -573,6 +586,14 @@ public class AirlineManagement {
       }
    }
    public static void feature6(AirlineManagement esql) {
+      try {
+         System.out.print("\tEnter a reservation number: ");
+         String reservationID = in.readLine();
+         String query = "SELECT * FROM Customer c join Reservation r on c.CustomerID = r.customerID WHERE r.ReservationID = '" + reservationID + "'";
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
    }
    public static void feature7(AirlineManagement esql) {
       try {
@@ -658,7 +679,7 @@ public class AirlineManagement {
          String destinationCity = in.readLine();
          System.out.print("\tEnter a departure city: ");
          String departureCity = in.readLine();
-         String query = "SELECT s.FlightNumber, s.DayOfWeek, s.DepartureTime, s.ArrivalTime FROM Schedule s join Flight f on s.FlightNumber = f.FlightNumber WHERE f.DepartureCity = '" + departureCity + "'  AND f.ArrivalCity = '" + destinationCity + "'";
+         String query = "SELECT s.FlightNumber, s.DayOfWeek, s.DepartureTime, s.ArrivalTime, i.NumOfStops, COUNT(CASE WHEN ArrivedOnTime = True THEN 1 END) * 1.0 / COUNT(*) AS onTimePercentage FROM Schedule s join Flight f on s.FlightNumber = f.FlightNumber join FlightInstance i on i.FlightNumber = f.FlightNumber WHERE f.DepartureCity = '" + departureCity + "'  AND f.ArrivalCity = '" + destinationCity + "' GROUP BY s.FlightNumber, s.DayOfWeek, s.DepartureTime, s.ArrivalTime, i.NumOfStops";
          esql.executeQueryAndPrintResult(query);
       }catch(Exception e){
          System.err.println (e.getMessage());
@@ -727,14 +748,90 @@ public class AirlineManagement {
             addReservation = "INSERT INTO Reservation (ReservationID, CustomerID, FlightInstanceID, Status) VALUES ('" + reservationID + "', '" + customerID + "', '" + flightInstanceID + "', 'waitlist');";
             esql.executeUpdate(addReservation);
          }
-
-
-
-
       }catch(Exception e){
          System.err.println (e.getMessage());
       }
    }
+
+   public static void viewRepairsForPlaneInRange(AirlineManagement esql) {
+      System.out.println("View all repairs for a plane within a date range");
+      try {
+         System.out.print("\tEnter Plane ID: ");
+         String planeID = in.readLine();
+         System.out.print("\tEnter start date (YYYY-MM-DD): ");
+         String startDate = in.readLine();
+         System.out.print("\tEnter end date (YYYY-MM-DD): ");
+         String endDate = in.readLine();
+
+         String query = "SELECT MaintenanceDate, RepairCode FROM Maintenance " +
+                        "WHERE AircraftID = '" + planeID + "' " +
+                        "AND MaintenanceDate BETWEEN DATE '" + startDate + "' AND DATE '" + endDate + "'";
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println("total row(s): " + rowCount);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+}
+
+public static void viewPilotMaintenanceRequests(AirlineManagement esql) {
+   System.out.println("View maintenance requests made by a pilot");
+   try {
+      System.out.print("\tEnter Pilot ID: ");
+      String pilotID = in.readLine();
+
+      String query = "SELECT PlaneID, RepairCode, RequestDate FROM MaintenanceRequest WHERE PilotID = '" + pilotID + "'";
+
+      int rowCount = esql.executeQueryAndPrintResult(query);
+      System.out.println("total row(s): " + rowCount);
+   } catch (Exception e) {
+      System.err.println(e.getMessage());
+   }
+}
+
+public static void logRepairEntry(AirlineManagement esql) {
+   System.out.println("Log a completed repair entry");
+   try {
+      System.out.print("\tEnter Plane ID: ");
+      String planeID = in.readLine();
+      System.out.print("\tEnter Repair Code: ");
+      String repairCode = in.readLine();
+      System.out.print("\tEnter Date of Repair (YYYY-MM-DD): ");
+      String repairDate = in.readLine();
+
+      String query = "INSERT INTO Maintenance (AircraftID, RepairCode, MaintenanceDate) VALUES " +
+                     "('" + planeID + "', '" + repairCode + "', DATE '" + repairDate + "')";
+
+      esql.executeUpdate(query);
+      System.out.println("Repair entry logged successfully.");
+   } catch (Exception e) {
+      System.err.println(e.getMessage());
+   }
+}
+
+public static void createMaintenanceRequest(AirlineManagement esql) {
+   System.out.println("Create a maintenance request");
+   try {
+      System.out.print("\tEnter Pilot ID: ");
+      String pilotID = in.readLine();
+      System.out.print("\tEnter Plane ID: ");
+      String planeID = in.readLine();
+      System.out.print("\tEnter Repair Code: ");
+      String repairCode = in.readLine();
+      System.out.print("\tEnter Request Date (YYYY-MM-DD): ");
+      String requestDate = in.readLine();
+
+      String query = "INSERT INTO MaintenanceRequest (PilotID, PlaneID, RepairCode, RequestDate) VALUES " +
+                     "('" + pilotID + "', '" + planeID + "', '" + repairCode + "', DATE '" + requestDate + "')";
+
+      esql.executeUpdate(query);
+      System.out.println("Maintenance request submitted.");
+   } catch (Exception e) {
+      System.err.println(e.getMessage());
+   }
+}
+
+
   
 
 
