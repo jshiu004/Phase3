@@ -708,11 +708,6 @@ public class AirlineManagement {
    public static void feature14(AirlineManagement esql) {
       try {
          System.out.println("\tMaking a reservation");
-         // System.out.println("\tEnter first name: ");
-         // String firstName = in.readLine();
-         // System.out.println("\tEnter last name");
-         // String lastName = in.readLine();
-
          System.out.print("\tEnter customerID: ");
          String customerID = in.readLine();
 
@@ -743,10 +738,13 @@ public class AirlineManagement {
             addReservation = "INSERT INTO Reservation (ReservationID, CustomerID, FlightInstanceID, Status) VALUES ('" + reservationID + "', '" + customerID + "', '" + flightInstanceID + "', 'reserved');";
             esql.executeUpdate(addReservation);
             String updateTickets = "UPDATE FlightInstance SET SeatsSold = SeatsSold + 1, WHERE FlightInstanceID = '" + flightInstanceID + "'";
+            esql.executeUpdate(updateTickets);
+            System.out.println("Reservation booking successful: reserved")
          }
          else {
             addReservation = "INSERT INTO Reservation (ReservationID, CustomerID, FlightInstanceID, Status) VALUES ('" + reservationID + "', '" + customerID + "', '" + flightInstanceID + "', 'waitlist');";
             esql.executeUpdate(addReservation);
+            System.out.println("Reservation booking successful: waitlist")
          }
       }catch(Exception e){
          System.err.println (e.getMessage());
@@ -763,12 +761,11 @@ public class AirlineManagement {
          System.out.print("\tEnter end date (YYYY-MM-DD): ");
          String endDate = in.readLine();
 
-         String query = "SELECT MaintenanceDate, RepairCode FROM Maintenance " +
-                        "WHERE AircraftID = '" + planeID + "' " +
-                        "AND MaintenanceDate BETWEEN DATE '" + startDate + "' AND DATE '" + endDate + "'";
+         String query = "SELECT RepairDate, RepairCode FROM Repair " +
+                     "WHERE PlaneID = '" + planeID + "' " +
+                     "AND RepairDate BETWEEN DATE '" + startDate + "' AND DATE '" + endDate + "'";
 
-         int rowCount = esql.executeQueryAndPrintResult(query);
-         System.out.println("total row(s): " + rowCount);
+         esql.executeQueryAndPrintResult(query);
       } catch (Exception e) {
          System.err.println(e.getMessage());
       }
@@ -782,8 +779,7 @@ public static void viewPilotMaintenanceRequests(AirlineManagement esql) {
 
       String query = "SELECT PlaneID, RepairCode, RequestDate FROM MaintenanceRequest WHERE PilotID = '" + pilotID + "'";
 
-      int rowCount = esql.executeQueryAndPrintResult(query);
-      System.out.println("total row(s): " + rowCount);
+      esql.executeQueryAndPrintResult(query);
    } catch (Exception e) {
       System.err.println(e.getMessage());
    }
@@ -798,9 +794,18 @@ public static void logRepairEntry(AirlineManagement esql) {
       String repairCode = in.readLine();
       System.out.print("\tEnter Date of Repair (YYYY-MM-DD): ");
       String repairDate = in.readLine();
+      System.out.print("\tEnter Technician ID: ");
+      String technicianID = in.readLine();
 
-      String query = "INSERT INTO Maintenance (AircraftID, RepairCode, MaintenanceDate) VALUES " +
-                     "('" + planeID + "', '" + repairCode + "', DATE '" + repairDate + "')";
+      String numRepairsQuery = "SELECT COUNT(*) FROM Repair";
+      int repairID = 0;
+      List<List<String>> result = esql.executeQueryAndReturnResult(numRepairsQuery);
+      repairID = Integer.parseInt(result.get(0).get(0));
+      repairID++;
+
+      String query = "INSERT INTO Repair (RepairID, PlaneID, RepairCode, RepairDate, TechnicianID) VALUES " + "(" + repairID + 
+                     ",'" + planeID + "', '" + repairCode + "', DATE '" + repairDate + "', '" + technicianID + "')";
+
 
       esql.executeUpdate(query);
       System.out.println("Repair entry logged successfully.");
@@ -821,8 +826,14 @@ public static void createMaintenanceRequest(AirlineManagement esql) {
       System.out.print("\tEnter Request Date (YYYY-MM-DD): ");
       String requestDate = in.readLine();
 
-      String query = "INSERT INTO MaintenanceRequest (PilotID, PlaneID, RepairCode, RequestDate) VALUES " +
-                     "('" + pilotID + "', '" + planeID + "', '" + repairCode + "', DATE '" + requestDate + "')";
+      String numRequestsQuery = "SELECT COUNT(*) FROM MaintenanceRequest";
+      int requestID = 0;
+      List<List<String>> result = esql.executeQueryAndReturnResult(numRequestsQuery);
+      requestID = Integer.parseInt(result.get(0).get(0));
+      requestID++;
+
+      String query = "INSERT INTO MaintenanceRequest (RequestID, PlaneID, RepairCode, RequestDate, PilotID) VALUES " + 
+                     "(" requestID + ", '" + planeID + "', '" + repairCode + "', DATE '" + requestDate + "', '" + pilotID + "')";
 
       esql.executeUpdate(query);
       System.out.println("Maintenance request submitted.");
