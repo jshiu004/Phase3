@@ -6,4 +6,4 @@ SELECT s.FlightNumber, s.DepartureTime, s.ArrivalTime, i.NumOfStops, (COUNT(CASE
 
 SELECT * FROM Customer c join Reservation r on c.CustomerID = r.customerID WHERE r.ReservationID = 'R0001';
 
-SELECT * FROM FlightInstance WHERE FlightDate = '2025-05-05';
+SELECT * FROM Repair r JOIN Technician t ON r.TechnicianID = t.TechnicianID WHERE t.TechnicianID = 'T001'
